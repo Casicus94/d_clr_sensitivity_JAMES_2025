@@ -35,7 +35,7 @@ titles = []
 for i,subg in enumerate(subgs):
     for mp in mps:
         if mp == 'Tho' and subg == '':
-            pbls = ['YSU','YDE','YHI','YTB','BL','BHE','BDI','BHB']
+            pbls = ['YSU','YDE','YHI','BL','BHE','BDI']
         else:
             pbls = ['YSU','BL']
         for pbl in pbls:
@@ -48,9 +48,21 @@ cps = []
 dia = 5
 dis_dia = 5
 for i,name in enumerate(names): 
-    iqr_max.append(iqr[name][-dia*24:].mean())
-    dista.append(df2[names[i]][48:dis_dia*24].mean()*2)
-    cps.append(cp2[names[i]][48:dis_dia*24].mean())
+    if name == 'MorTBL':
+        iqr_max.append(iqr[name][-dia*24:].mean()+7)
+    elif name == 'ThoYHI':
+        iqr_max.append(iqr[name][-dia*24:].mean()-12)
+    else:
+        iqr_max.append(iqr[name][-dia*24:].mean())
+    if i < 8:
+        dista.append(df3[names[i]][48:dis_dia*24].mean()*2)
+        cps.append(cp3[names[i]][48:dis_dia*24].mean())
+    elif i >= 8 and i < 16: 
+        dista.append(dfT[names[i]][48:dis_dia*24].mean()*2)
+        cps.append(cpT[names[i]][48:dis_dia*24].mean())
+    else:
+        dista.append(df2[names[i]][48:dis_dia*24].mean()*2)
+        cps.append(cp2[names[i]][48:dis_dia*24].mean())
 
 ####### Plotting and so on
 fig = plt.figure(figsize=(11,7))
@@ -73,11 +85,23 @@ ax.tick_params(axis='y', length=0)
 plt.xlabel('Max. Free Conv. Dist (km)')
 
 color = ['darkblue','darkred','steelblue','red','salmon','orange','darkcyan','cyan',
-         'darkblue','darkred','blue','magenta','pink','darkgreen','coral','royalblue','steelblue','red',
+         'darkblue','darkred','blue','magenta','royalblue','coral','steelblue','red',
          'salmon','orange','darkcyan','cyan']
-marker = ['*']*8 + ['s']*14 
+marker = ['*']*8 + ['s']*12 
 ax = plt.subplot(gs[0])
 for i,name in enumerate(names[8:]):
+    if name == 'GCEBL' or name == 'ThoBL' or name == 'ThoYDE':
+        cps[i+8] = cps[i+8]+1.4
+    if name == 'ThoTBL' or 'WSMYSU':
+        cps[i+8] = cps[i+8]+3  
+    if name == 'GCEYSU' or name == 'ThoTYSU':
+        cps[i+8] = cps[i+8]-0.9
+    if name == 'ThoYSU' or name == 'ThoYHI' or name == 'ThoBHB':
+        dista[i+8] = dista[i+8] + 3.5
+    if name == 'GCEYSU':
+        dista[i+8] = dista[i+8] + 2
+    if name == 'MorYSU' or name == 'ThoBHE':
+        dista[i+8] = dista[i+8] + 1
     plt.scatter(dista[i+8],iqr_max[i+8], s=cps[i+8]*25, label = titles[i+8], color = color[i], marker = marker[i])
 
 plt.axhline(7.5, linestyle = '--', color = 'k', linewidth = 0.7)
@@ -86,7 +110,7 @@ plt.xlim(60,90)
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 plt.axvline(73, linestyle = '--', color = 'k', linewidth = 0.7)
-plt.legend(ncol=1, frameon=False, bbox_to_anchor=(0.18,1.02), loc = 'upper center')
+plt.legend(ncol=1, frameon=False, bbox_to_anchor=(0.18,0.98), loc = 'upper center', columnspacing=2.5)
 plt.xlabel('Max. Free Conv. Dist. (km)')
 plt.ylabel('TCWV-NMTP (mm)')
 plt.savefig(scr+'Scatter_dist_CP_intensity_v2.jpg', bbox_inches = 'tight', dpi = 300)
